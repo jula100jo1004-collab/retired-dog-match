@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나랑 딱 맞는 은퇴견 짝꿍 찾기</title>
+    
+    <!-- 썸네일 및 SNS 공유(Open Graph) 설정 -->
+    <meta property="og:title" content="나랑 딱 맞는 은퇴견 짝꿍 찾기">
+    <meta property="og:description" content="국가를 위해 성실히 일하고 은퇴한 탐지견들! 나와 가장 잘 맞는 평생 짝꿍을 찾아보세요.">
+    <meta property="og:image" content="og-image.png">
+    <meta property="og:type" content="website">
+
+    <!-- 구글 폰트: 둥근고딕 느낌의 Jua 및 Pretendard -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF7043;
+            --primary-light: #FF8A65;
+            --primary-dark: #F4511E;
+            --bg-color: #FFF3E0;
+            --card-bg: #FFFFFF;
+            --text-main: #3E2723;
+            --text-sub: #795548;
+            --accent: #FFB74D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(255, 112, 67, 0.15);
+            overflow: hidden;
+            border: 4px solid #FFE0B2;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .screen {
+            display: none;
+            padding: 30px 24px;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* 시작 화면 */
+        .start-screen {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
+        }
+
+        .start-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: bounce 1.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
+        .start-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 28px;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .start-desc {
+            font-size: 15px;
+            color: var(--text-sub);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        /* 질문 화면 */
+        .question-header {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #FFE0B2;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 20%;
+            transition: width 0.3s ease;
+        }
+
+        .question-step {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 22px;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background-color: #FAFAFA;
+            border: 2px solid #FFE0B2;
+            border-radius: 14px;
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-btn:hover {
+            background-color: #FFF3E0;
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background-color: #FFCCBC;
+            border-color: var(--primary);
+            color: var(--primary-dark);
+        }
+
+        /* 결과 화면 */
+        .result-screen {
+            overflow-y: auto;
+            max-height: 85vh;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-header h2 {
+            font-family: 'Jua', sans-serif;
+            font-size: 24px;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+
+        .result-header p {
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .match-card {
+            background: #FFF8E1;
+            border: 2px solid #FFE0B2;
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(255, 112, 67, 0.3);
+        }
+
+        .dog-info h3 {
+            font-family: 'Jua', sans-serif;
+            font-size: 18px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .dog-meta {
+            font-size: 12px;
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dog-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.4;
+        }
+
+        /* 공통 버튼 */
+        .primary-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-family: 'Jua', sans-serif;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(255, 112, 67, 0.35);
+            transition: transform 0.1s ease;
+        }
+
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 스크롤바 디자인 */
+        .result-screen::-webkit-scrollbar {
+            width: 6px;
+        }
+        .result-screen::-webkit-scrollbar-thumb {
+            background-color: #FFE0B2;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- 1. 시작 화면 -->
+        <div id="screen-start" class="screen start-screen active">
+            <div>
+                <div class="start-icon">🦮🧡</div>
+                <h1 class="start-title">나랑 딱 맞는<br>은퇴견 짝꿍 찾기</h1>
+                <p class="start-desc">국가를 위해 성실히 일하고 은퇴한 탐지견들!<br>나와 가장 잘 맞는 평생 짝꿍을 찾아보세요.</p>
+            </div>
+            <button class="primary-btn" onclick="startQuiz()">테스트 시작하기</button>
+        </div>
+
+        <!-- 2. 질문 화면 -->
+        <div id="screen-question" class="screen">
+            <div>
+                <div class="question-header">
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="question-step" class="question-step">QUESTION 1 / 5</div>
+                    <h2 id="question-title" class="question-title">질문 내용이 여기에 들어갑니다.</h2>
+                </div>
+                <div id="options-list" class="options-list">
+                    <!-- 동적 생성될 선택지 버튼들 -->
+                </div>
+            </div>
+            <button id="next-btn" class="primary-btn" style="display:none;" onclick="nextQuestion()">다음으로</button>
+        </div>
+
+        <!-- 3. 결과 화면 -->
+        <div id="screen-result" class="screen result-screen">
+            <div class="result-header">
+                <h2>🎉 환상의 케미를 자랑하는 짝꿍 TOP 3</h2>
+                <p>당신의 라이프스타일에 찰떡궁합인 은퇴 탐지견들이에요!</p>
+            </div>
+            
+            <div id="match-list" class="match-list">
+                <!-- 동적 생성될 결과 카드들 -->
+            </div>
+
+            <button class="primary-btn" onclick="restartQuiz()">처음부터 다시 하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 은퇴 탐지견 데이터 (10마리)
+        const retiredDogs = [
+            { id: 1, name: "바람이", breed: "래브라도 리트리버", gender: "여아", walk: "long", house: "yard", other: "yes", exp: "yes", style: "active", desc: "활기차고 에너지가 넘치는 수색견 출신이에요. 넓은 마당에서 뛰놀며 함께 산책하는 것을 가장 좋아합니다." },
+            { id: 2, name: "초코", breed: "잉글리시 코커스판일", gender: "남아", walk: "medium", house: "apartment", other: "no", exp: "no", style: "friendly", desc: "사람을 너무 좋아하고 애교가 많아요. 초보 보호자님도 쉽게 친해질 수 있는 다정한 성격입니다." },
+            { id: 3, name: "마루", breed: "저먼 셰퍼드", gender: "남아", walk: "long", house: "yard", other: "yes", exp: "yes", style: "calm", desc: "든든하고 침착한 성품의 경비 탐지견이었어요. 든든한 울타리가 되어줄 수 있는 마당 있는 집을 선호해요." },
+            { id: 4, name: "해피", breed: "래브라도 리트리버", gender: "여아", walk: "medium", house: "apartment", other: "yes", exp: "yes", style: "friendly", desc: "다른 반려동물과도 사회성이 좋아 금방 어울려요. 적당한 산책과 실내 휴식을 즐길 줄 아는 모범생입니다." },
+            { id: 5, name: "뭉치", breed: "비글", gender: "남아", walk: "long", house: "villa", other: "no", exp: "no", style: "active", desc: "호기심이 많고 장난기가 가득해요. 산책할 때 세상 누구보다 행복한 표정을 짓는 귀여운 탐지견입니다." },
+            { id: 6, name: "보람", breed: "벨기에 말리노이즈", gender: "여아", walk: "long", house: "yard", other: "no", exp: "yes", style: "active", desc: "집중력이 뛰어나고 충성심이 깊어요. 보호자와 함께 교감하며 활동적인 교육이나 놀이를 하기에 최고입니다." },
+            { id: 7, name: "사랑", breed: "골든 리트리버", gender: "여아", walk: "short", house: "apartment", other: "yes", exp: "no", style: "calm", desc: "온순하고 차분한 인형 같은 성격이에요. 실내에서 조용히 곁을 지켜주는 든든한 힐링 메이트입니다." },
+            { id: 8, name: "태풍", breed: "저먼 셰퍼드", gender: "남아", walk: "long", house: "yard", other: "yes", exp: "yes", style: "calm", desc: "늠름한 외모와 달리 곁에선 세상 다정한 반전 매력의 소유자. 든든한 수호천사가 되어줍니다." },
+            { id: 9, name: "콩이", breed: "래브라도 리트리버", gender: "남아", walk: "medium", house: "apartment", other: "no", exp: "no", style: "friendly", desc: "먹는 것과 산책을 사랑하는 순둥이예요. 아파트 환경에서도 적응을 잘하는 우수 은퇴견입니다." },
+            { id: 10, name: "루비", breed: "잉글리시 코커스판일", gender: "여아", walk: "short", house: "villa", other: "no", exp: "yes", style: "calm", desc: "눈치가 빠르고 조용히 교감할 줄 아는 사려 깊은 친구예요. 아늑한 실내 생활을 선호합니다." }
+        ];
+
+        // 질문 데이터
+        const questions = [
+            {
+                id: 1,
+                title: "하루에 강아지 산책에 투자할 수 있는 시간은 얼마나 되나요?",
+                options: [
+                    { text: "30분 미만 (가벼운 산책 위주)", value: "short" },
+                    { text: "30분 ~ 1시간 30분 (적당한 산책)", value: "medium" },
+                    { text: "1시간 30분 이상 (충분한 야외 활동)", value: "long" }
+                ]
+            },
+            {
+                id: 2,
+                title: "현재 거주하고 계신 주거 형태는 어떤가요?",
+                options: [
+                    { text: "아파트 / 오피스텔", value: "apartment" },
+                    { text: "빌라 / 다세대 주택", value: "villa" },
+                    { text: "마당이 있는 단독주택", value: "yard" }
+                ]
+            },
+            {
+                id: 3,
+                title: "집에 다른 반려동물이 함께 살고 있나요?",
+                options: [
+                    { text: "아니요, 저 혼자/우리 가족만 있어요", value: "no" },
+                    { text: "네, 다른 반려동물이 있어요", value: "yes" }
+                ]
+            },
+            {
+                id: 4,
+                title: "반려견을 키워본 경험이 있으신가요?",
+                options: [
+                    { text: "아니요, 이번이 처음이에요 (초보 보호자)", value: "no" },
+                    { text: "네, 키워본 경험이 있어요 (능숙한 보호자)", value: "yes" }
+                ]
+            },
+            {
+                id: 5,
+                title: "어떤 성격의 반려견과 함께하고 싶으신가요?",
+                options: [
+                    { text: "차분하고 듬직하게 곁을 지켜주는 성격", value: "calm" },
+                    { text: "활기차고 에너지가 넘치는 활발한 성격", value: "active" },
+                    { text: "사람을 좋아하고 애교가 많은 다정한 성격", value: "friendly" }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let selectedOptionValue = null;
+
+        const screenStart = document.getElementById('screen-start');
+        const screenQuestion = document.getElementById('screen-question');
+        const screenResult = document.getElementById('screen-result');
+        const progressBar = document.getElementById('progress-bar');
+        const questionStep = document.getElementById('question-step');
+        const questionTitle = document.getElementById('question-title');
+        const optionsList = document.getElementById('options-list');
+        const nextBtn = document.getElementById('next-btn');
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            screenStart.classList.remove('active');
+            screenQuestion.classList.add('active');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            selectedOptionValue = null;
+            nextBtn.style.display = 'none';
+
+            const q = questions[currentQuestionIndex];
+            questionStep.innerText = `QUESTION ${currentQuestionIndex + 1} / ${questions.length}`;
+            questionTitle.innerText = q.title;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+            optionsList.innerHTML = '';
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span>${opt.text}</span>`;
+                btn.onclick = () => selectOption(opt.value, btn);
+                optionsList.appendChild(btn);
+            });
+        }
+
+        function selectOption(value, btnElement) {
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            btnElement.classList.add('selected');
+            selectedOptionValue = value;
+            nextBtn.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (selectedOptionValue === null) return;
+
+            // 답변 저장
+            const qKey = ['walk', 'house', 'other', 'exp', 'style'][currentQuestionIndex];
+            userAnswers[qKey] = selectedOptionValue;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            screenQuestion.classList.remove('active');
+            screenResult.classList.add('active');
+
+            // 점수 계산 로직
+            const scoredDogs = retiredDogs.map(dog => {
+                let score = 60; // 기본 점수
+
+                // 산책 매칭
+                if (dog.walk === userAnswers.walk) score += 15;
+                // 주거 형태 매칭
+                if (dog.house === userAnswers.house) score += 10;
+                // 기타 반려동물 유무 매칭
+                if (dog.other === userAnswers.other) score += 5;
+                // 성향 매칭
+                if (dog.style === userAnswers.style) score += 10;
+
+                // 약간의 랜덤 요소를 더해 자연스러움 연출 (최대 99점 제한)
+                score += Math.floor(Math.random() * 5);
+                if (score > 99) score = 99;
+
+                return { ...dog, score };
+            });
+
+            // 점수 높은 순으로 정렬 후 TOP 3 추출
+            scoredDogs.sort((a, b) => b.score - a.score);
+            const top3 = scoredDogs.slice(0, 3);
+
+            const matchList = document.getElementById('match-list');
+            matchList.innerHTML = '';
+
+            top3.forEach((dog, index) => {
+                const rankText = index === 0 ? '🏆 1순위 짝꿍' : index === 1 ? '🥈 2순위 짝꿍' : '🥉 3순위 짝꿍';
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `
+                    <div class="match-badge">${rankText} (${dog.score}점)</div>
+                    <div class="dog-info">
+                        <h3>${dog.name} (${dog.gender})</h3>
+                        <div class="dog-meta">${dog.breed}</div>
+                        <p class="dog-desc">${dog.desc}</p>
+                    </div>
+                `;
+                matchList.appendChild(card);
+            });
+        }
+
+        function restartQuiz() {
+            screenResult.classList.remove('active');
+            screenStart.classList.add('active');
+        }
+    </script>
+</body>
+</html>
